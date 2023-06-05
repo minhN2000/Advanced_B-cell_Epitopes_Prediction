@@ -28,4 +28,8 @@ Both of these methods allow the model to consider the context around each amino 
 
 Please check out demo.ipynb for further instruction.'
 
+## Contributors
+Minh Nguyen - nguye3mt@mail.uc.edu
+Alexey Porollo - salexey.porollo@cchmc.org
+s
 ## References
