@@ -9,6 +9,16 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Lambda, Dense,Dropout, Conv1D, Flatten, LSTM, Bidirectional, TimeDistributed
 
 class Predicting:
+    """
+    A class to predict the embeddings of protein sequences using pre-trained models.
+
+    Attributes:
+    embedding_file_path (str): The path to the embeddings file.
+    models_dir_path (str): The directory path where the models are stored.
+    fasta_file_path (str): The path to the fasta file containing the protein sequences.
+    out_path (str): The output path for saving the prediction results.
+    threshold (float): The decision threshold for prediction.
+    """
     def __init__(self, threshold, out_path, embedding_file_path, models_dir_path, fasta_file_path):
         self.embedding_file_path = embedding_file_path
         self.models_dir_path = models_dir_path
@@ -17,6 +27,16 @@ class Predicting:
         self.threshold = threshold
         
     def predicting(self, model_type, method):
+        """
+        This method performs prediction using pre-trained models.
+
+        Parameters:
+        model_type (str): The type of the model to be used for prediction.
+        method (int): The method to be used for prediction.
+
+        Returns:
+        final_df (DataFrame): A DataFrame containing the prediction results.
+        """
         # load model
         fold_models = self.__load_model(models_dir_path=self.models_dir_path, model_type=model_type, method=method)
         
@@ -103,12 +123,33 @@ class Predicting:
         return final_df
     
     def __get_raw_y_predict(self, y_predict, raw_y_shape):
+        """
+        This method reshapes the predicted results based on the shape of the original data.
+
+        Parameters:
+        y_predict (numpy.ndarray): The predicted results.
+        raw_y_shape (list): The shape of the original data.
+
+        Returns:
+        raw_y_predict (list): The reshaped predicted results.
+        """
         raw_y_predict = []
         for i, e in enumerate(raw_y_shape):
             raw_y_predict.append(y_predict[i][:e].flatten())
         return raw_y_predict
     
     def __load_model(self, models_dir_path, model_type='cnn', method=1):
+        """
+        This method loads pre-trained models.
+
+        Parameters:
+        models_dir_path (str): The directory path where the models are stored.
+        model_type (str): The type of the model to be loaded.
+        method (int): The method to be used for prediction.
+
+        Returns:
+        fold_models (list): A list of loaded models.
+        """
         fold_models = []    
         
         for i in range(5):
@@ -124,6 +165,16 @@ class Predicting:
         return fold_models
         
     def __get_model(self, model_type, method):
+        """
+        This method creates the model architecture based on the provided model type and method.
+
+        Parameters:
+        model_type (str): The type of the model to be created.
+        method (int): The method to be used for model creation.
+
+        Returns:
+        model (Sequential): The created model.
+        """
         # model architechture
         if method==1:
             if model_type == 'fnn':
@@ -179,9 +230,29 @@ class Predicting:
                 raise ValueError("Unknown method type") 
 
     def __load_data(self, embedding_file_path):
+        """
+        This method loads the embedded data from a csv file.
+
+        Parameters:
+        embedding_file_path (str): The path to the embeddings file.
+
+        Returns:
+        DataFrame: The loaded embedded data.
+        """
         return pd.read_csv(embedding_file_path)
 
     def __padding(self, x, method):
+        """
+        This method applies padding to the input data based on the provided method.
+
+        Parameters:
+        x (numpy.ndarray): The input data.
+        method (int): The method to be used for padding.
+
+        Returns:
+        new_xs (list): The padded data.
+        raw_y_shape (list): The shape of the original data.
+        """
         EMBEDDED_SIZE=1024
         raw_y_shape = []
         if method == 1:
@@ -241,6 +312,15 @@ class Predicting:
         return new_xs, raw_y_shape
     
     def __load_fasta(self, fasta_file_path):
+        """
+        This method loads protein sequences from a fasta file into a dictionary.
+
+        Parameters:
+        fasta_file_path (str): The path to the fasta file.
+
+        Returns:
+        dic2 (dict): A dictionary with protein IDs as keys and sequences as values, sorted by sequence length in descending order.
+        """
         dictionary = {}
         with open(fasta_file_path) as fasta_file:
             seq = ''

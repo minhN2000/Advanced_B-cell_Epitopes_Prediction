@@ -13,6 +13,15 @@ warnings.filterwarnings("ignore")
 
 DATA_DIR = "data"
 class Embedding:
+    """
+    This class is used for generating embeddings of protein sequences using different models. 
+
+    Attributes:
+    in_file (str): Path to the input file containing protein sequences.
+    out_file (str): Path to the output file where the embeddings will be stored.
+    level (str): Level of embedding ('protein', 'residue', or 'both').
+    embed (str): The embedding model to use ('prott5', 'esm', 'esm1b', or 'onehot').
+    """
     def __init__(self, in_file, out_file, level='residue', embed='prott5'):
         self.in_file = in_file
         self.out_file = out_file
@@ -21,6 +30,12 @@ class Embedding:
         self.embed = embed
 
     def embedding(self):
+        """
+        This function generates the embeddings of protein sequences.
+
+        Returns:
+        The embeddings of protein sequences as a pandas DataFrame.
+        """
         # reading sequence
         seq_dict = self.__read_file(filepath=self.in_file)
         if self.embed == 'onehot':
@@ -45,12 +60,15 @@ class Embedding:
         return self.__embed_one_file(sequences=seq_dict, out_dir=self.out_dir, out_file=self.out_file, embed=self.embed,  is_residue=l)
     
     def __read_file(self, filepath):
-        '''
-        Take a fasta file and return a dictionary of {pID: sequence}
-        Fasta file should each have 1 line for pid and 1 line for sequence
-        Input: str filepath - file to read
-        Output: dictionary {str: str}
-        '''
+        """
+        This function reads a FASTA file and returns a dictionary of {protein ID: sequence}.
+
+        Parameters:
+        filepath (str): Path to the FASTA file.
+
+        Returns:
+        dictionary (dict): A dictionary where the keys are protein IDs and the values are protein sequences.
+        """
         dictionary = {}
         with open(filepath) as fasta_file:
             seq = ''
@@ -69,15 +87,18 @@ class Embedding:
         return dic2
 
     def __file_initialize(self, target_file, vect_len, is_residue=False):
-        '''
-        Initialize file with the right column names
-        If residue mode is on, initialized both protein and residue
-        level file
-        If not, initialized only protein file
-        Input: str target_file - file name to initialized
-        int vect_len - vector length (specific to different models)
-        Output: True if successfully run
-        '''
+        """
+            This function initializes a CSV file with the appropriate column names.
+
+            Parameters:
+            target_file (str): Path to the target CSV file.
+            vect_len (int): Vector length (specific to different models).
+            is_residue (bool, optional): If True, initializes both protein and residue level files. If False, only initializes protein file. Default is False.
+
+            Returns:
+            True if the CSV file is successfully initialized.
+        """
+
         random_list = ['sv'+str(x) for x in range(1, vect_len+1)]
         random_list.append('ProteinID')
         if is_residue:
@@ -91,12 +112,17 @@ class Embedding:
         return True
 
     def __write_csv(self, target_file, row):
-        '''
-        A function that take embeddings dict of name: embeddings
-        and update into a new file
-        Input: str target_file - file to write on
-        Output: True if successfully run
-        '''
+        """
+        This function writes embbedding row to a CSV file.
+
+        Parameters:
+        target_file (str): Path to the target CSV file.
+        row (list): The row to be written to the CSV file.
+
+        Returns:
+        True if the row is successfully written to the CSV file.
+        """
+
         with open(target_file, 'a') as csvfile: 
             # creating a csv writer object 
             csvwriter = csv.writer(csvfile) 
@@ -105,15 +131,19 @@ class Embedding:
         return True
     
     def __embed_one_file(self, sequences, out_dir, out_file, embed='prott5', is_residue=True):
-        '''
-        A function that return the embeddings of a dictionary of sequences
-        Input: dictionary of {name: sequence}, str embed - model type,
-        str out_file - file to write embeddings to,
-        int vect_len - vect_len specific to model type
-        bool is_residue - if it is residue, generate 2 files for both protein and residue embeddings,
-        generate 1 file for protein embeddings only if not
-        Output: 0 if run successfully
-        '''
+        """
+        This function generates and writes the embeddings of protein sequences to a CSV file.
+
+        Parameters:
+        sequences (dict): A dictionary where the keys are protein names and the values are protein sequences.
+        out_dir (str): Directory where the CSV file will be saved.
+        out_file (str): Name of the CSV file.
+        embed (str, optional): The embedding model to use. It can be 'prott5', 'esm', 'esm1b', 'seq', or 'onehot'. Default is 'prott5'.
+        is_residue (bool, optional): If True, generates both protein and residue level embeddings. If False, only generates protein level embeddings. Default is True.
+
+        Returns:
+        Path to the generated CSV file.
+        """
         if embed == 'esm1b':
             embedder = Esm1bEmbedder()
         elif embed == 'esm':
